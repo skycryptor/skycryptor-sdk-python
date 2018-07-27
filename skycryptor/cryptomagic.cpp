@@ -12,9 +12,9 @@ static PyObject* cryptomagic_init_wrapper(PyObject *self, PyObject *args) {
 
 
 static PyObject* cryptomagic_new_wrapper(PyObject *self, PyObject *args) {
-    void* cm_Ptr = cryptomagic_new();
-    PyObject* v = PyCapsule_New(cm_Ptr, "cm", NULL);
-    return v;
+    void* cm_obj = cryptomagic_new();
+    PyObject* cm_Ptr = PyCapsule_New(cm_obj, "cm", NULL);
+    return cm_Ptr;
 }
 
 static PyObject* cryptomagic_clear_wrapper(PyObject *self, PyObject *args) {
@@ -37,29 +37,28 @@ static PyObject* cryptomagic_generate_private_key_wrapper(PyObject *self, PyObje
     PyObject* sk = PyCapsule_New(sk_Ptr, "sk", NULL);
     return sk;
 }
-/*
+
 static PyObject* cryptomagic_private_key_free_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+    PyObject* sk_Ptr;
+
+    if (! PyArg_UnpackTuple( args, "sk_obj",0,1, &sk_Ptr))
         return NULL;
 
-    PyObject* sk_tr = PyList_GetItem(listObj, 0);
-
-    cryptomagic_private_key_free(sk_Ptr);
+    cryptomagic_private_key_free(PyCapsule_GetPointer(sk_Ptr, "sk"));
     Py_RETURN_NONE;
 }
 
 static PyObject* cryptomagic_get_public_key_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+    PyObject* sk_Ptr;
+
+    if (! PyArg_UnpackTuple( args, "sk_obj",0,1, &sk_Ptr))
         return NULL;
 
-    PyObject* sk_Ptr = PyList_GetItem(listObj, 0);
-
-    cryptomagic_get_public_key(sk_Ptr);
-    Py_RETURN_NONE;
+    void* pk_Ptr = cryptomagic_get_public_key(PyCapsule_GetPointer(sk_Ptr, "sk"));
+    PyObject* pk = PyCapsule_New(pk_Ptr, "pk", NULL);
+    return pk;
 }
-*/
+
 static PyObject* cryptomagic_private_key_to_bytes_wrapper(PyObject *self, PyObject * args){
     PyObject* sk_Ptr;
     
@@ -72,189 +71,212 @@ static PyObject* cryptomagic_private_key_to_bytes_wrapper(PyObject *self, PyObje
     cryptomagic_private_key_to_bytes(PyCapsule_GetPointer(sk_Ptr, "sk"), &buffer, &length);
     return PyBytes_FromString(buffer);
 }
-/*
+
 static PyObject* cryptomagic_public_key_to_bytes_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+    PyObject* pk_Ptr;
+    
+    if (! PyArg_UnpackTuple( args, "to_bytes",0,1, &pk_Ptr))
         return NULL;
 
-    PyObject* pk_Ptr = PyList_GetItem(listObj, 0);
-    PyObject* buffer = PyList_GetItem(listObj, 1); // convert to char**
-    PyObject* length = PyList_GetItem(listObj, 2); // convert to int*
+    char *buffer;
+    int length; 
 
-    cryptomagic_public_key_to_bytes(pk_Ptr, buffer, length);
-    Py_RETURN_NONE;
+    cryptomagic_private_key_to_bytes(PyCapsule_GetPointer(pk_Ptr, "pk"), &buffer, &length);
+    return PyBytes_FromString(buffer);
 }
 
 static PyObject* cryptomagic_private_key_from_bytes_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+    PyObject* cm_obj;
+    PyObject* data;
+    
+    if (! PyArg_UnpackTuple( args, "from_bytes",2,2, &cm_obj, &data))
         return NULL;
 
-    PyObject* cm_Ptr = PyList_GetItem(listObj, 0);
-    PyObject* buffer = PyList_GetItem(listObj, 1); // convert to char**
-    PyObject* length = PyList_GetItem(listObj, 2); // convert to int*
-
-    cryptomagic_private_key_from_bytes(cm_Ptr, buffer, length);
-    Py_RETURN_NONE;
+    const char* buffer = PyBytes_AsString(data);
+    void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm"); 
+    void* sk_obj = cryptomagic_private_key_from_bytes(cm_Ptr, buffer, strlen(buffer));
+    PyObject* sk_Ptr = PyCapsule_New(sk_obj, "sk", NULL);
+    return sk_Ptr;
 }
 
 static PyObject* cryptomagic_public_key_from_bytes_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+    PyObject* cm_obj;
+    PyObject* data;
+    
+    if (! PyArg_UnpackTuple( args, "from_bytes",2,2, &cm_obj, &data))
         return NULL;
 
-    PyObject* cm_Ptr = PyList_GetItem(listObj, 0);
-    PyObject* buffer = PyList_GetItem(listObj, 1); // convert to char**
-    PyObject* length = PyList_GetItem(listObj, 2); // convert to int*
-
-    cryptomagic_public_key_from_bytes(cm_Ptr, buffer, length);
-    Py_RETURN_NONE;
+    char* buffer = PyBytes_AsString(data);
+    void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm"); 
+    void* pk_obj = cryptomagic_public_key_from_bytes(cm_Ptr, buffer, strlen(buffer));
+    PyObject* pk_Ptr = PyCapsule_New(pk_obj, "pk", NULL);
+    return pk_Ptr;
 }
 
 static PyObject* cryptomagic_public_key_free_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+    PyObject* pk_Ptr;
+
+    if (! PyArg_UnpackTuple( args, "pk_obj",0,1, &pk_Ptr))
         return NULL;
 
-    PyObject* pk_Ptr = PyList_GetItem(listObj, 0);
-
-    cryptomagic_public_key_free(pk_Ptr);
+    cryptomagic_public_key_free(PyCapsule_GetPointer(pk_Ptr, "pk"));
     Py_RETURN_NONE;
 }
 
-
-static PyObject* cryptomagic_encapsulate_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+static PyObject* cryptomagic_encapsulate_wrapper(PyObject *self, PyObject * args)
+{
+    PyObject* cm_obj;
+    PyObject* pk_obj;
+    
+    if (! PyArg_UnpackTuple( args, "_obj", 2, 2, &cm_obj, &pk_obj))
         return NULL;
 
-    PyObject* cm_Ptr = PyList_GetItem(listObj, 0);
-    PyObject* pk_Ptr = PyList_GetItem(listObj, 1);
-    PyObject* buffer = PyList_GetItem(listObj, 2); // convert to char**
-    PyObject* length = PyList_GetItem(listObj, 3); // convert to int*
+    char *buffer;
+    int length; 
+    void* capsule_obj = cryptomagic_encapsulate(cm_obj, pk_obj, &buffer, &length);
+    PyObject* capsule_Ptr = PyCapsule_New(capsule_obj, "capsule", NULL);
+    PyObject* symmetric_key = PyBytes_FromString(buffer);
+   
+    return capsule_Ptr, symmetric_key; 
+}
 
-    cryptomagic_encapsulate(cm_Ptr, pk_Ptr, buffer, length);
+static PyObject* cryptomagic_capsule_free_wrapper(PyObject *self, PyObject * args)
+{
+    PyObject* capsule_Ptr;
+
+    if (! PyArg_UnpackTuple( args, "capsule_obj",0,1, &capsule_Ptr))
+        return NULL;
+
+    cryptomagic_capsule_free(PyCapsule_GetPointer(capsule_Ptr, "capsule"));
     Py_RETURN_NONE;
 }
 
-static PyObject* cryptomagic_capsule_free_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+static PyObject* cryptomagic_decapsulate_wrapper(PyObject *self, PyObject * args)
+{
+    PyObject* cm_obj;
+    PyObject* sk_obj;
+    PyObject* capsule_obj;
+    
+    if (! PyArg_UnpackTuple( args, "_obj",3,3, &cm_obj, &sk_obj, &capsule_obj))
         return NULL;
 
-    PyObject* capsule_Ptr = PyList_GetItem(listObj, 0);
+    char *buffer;
+    int length; 
 
-    cryptomagic_capsule_free(capsule_Ptr);
-    Py_RETURN_NONE;
+    void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm");
+    void* sk_Ptr = PyCapsule_GetPointer(sk_obj, "sk");
+    void* capsule_Ptr = PyCapsule_GetPointer(capsule_obj, "capsule");
+    cryptomagic_decapsulate(cm_Ptr, sk_Ptr, capsule_Ptr, &buffer, &length);
+    PyObject* symmetric_key = PyBytes_FromString(buffer);
+   
+    return symmetric_key; 
 }
 
-static PyObject* cryptomagic_decapsulate_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+static PyObject* cryptomagic_capsule_to_bytes_wrapper(PyObject *self, PyObject * args)
+{
+    PyObject* capsule_Ptr;
+    
+    if (! PyArg_UnpackTuple( args, "to_bytes",0,1, &capsule_Ptr))
         return NULL;
 
-    PyObject* cm_Ptr = PyList_GetItem(listObj, 0);
-    PyObject* capsule_Ptr = PyList_GetItem(listObj, 1);
-    PyObject* sk_Ptr = PyList_GetItem(listObj, 2);
-    PyObject* buffer = PyList_GetItem(listObj, 3); // convert to char**
-    PyObject* length = PyList_GetItem(listObj, 4); // convert to int*
+    char *buffer;
+    int length; 
 
-    cryptomagic_decapsulate(cm_Ptr, capsule_Ptr, sk_Ptr, buffer, length);
-    Py_RETURN_NONE;
+    cryptomagic_capsule_to_bytes(PyCapsule_GetPointer(capsule_Ptr, "capsule"), &buffer, &length);
+    return PyBytes_FromString(buffer);
 }
 
-static PyObject* cryptomagic_capsule_to_bytes_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+static PyObject* cryptomagic_capsule_from_bytes_wrapper(PyObject *self, PyObject * args)
+{
+    PyObject* cm_obj;
+    PyObject* data;
+    
+    if (! PyArg_UnpackTuple( args, "from_bytes",2,2, &cm_obj, &data))
         return NULL;
 
-    PyObject* capsule_Ptr = PyList_GetItem(listObj, 0);
-    PyObject* buffer = PyList_GetItem(listObj, 1); // convert to char**
-    PyObject* length = PyList_GetItem(listObj, 2); // convert to int*
-
-    cryptomagic_capsule_to_bytes(capsule_Ptr, buffer, length);
-    Py_RETURN_NONE;
+    char* buffer = PyBytes_AsString(data);
+    void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm"); 
+    void* capsule_obj = cryptomagic_capsule_from_bytes(cm_Ptr, buffer, strlen(buffer));
+    PyObject* capsule_Ptr = PyCapsule_New(capsule_obj, "capsule", NULL);
+    return capsule_Ptr;
 }
 
-static PyObject* cryptomagic_capsule_from_bytes_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+static PyObject* cryptomagic_get_re_encryption_key_wrapper(PyObject *self, PyObject * args)
+{
+    PyObject* sk_obj;
+    PyObject* pk_obj;
+    
+    if (! PyArg_UnpackTuple( args, "from_bytes",2,2, &sk_obj, &pk_obj))
         return NULL;
 
-    PyObject* cm_Ptr = PyList_GetItem(listObj, 0);
-    PyObject* buffer = PyList_GetItem(listObj, 1); // convert to char**
-    PyObject* length = PyList_GetItem(listObj, 2); // convert to int*
+    void * cm_Ptr = PyCapsule_GetPointer(sk_obj, "cm");
+    void * sk_Ptr = PyCapsule_GetPointer(sk_obj, "sk");
+    void * pk_Ptr = PyCapsule_GetPointer(pk_obj, "pk");
 
-    cryptomagic_capsule_from_bytes(cm_Ptr, buffer, length);
-    Py_RETURN_NONE;
+    void* rk_obj = cryptomagic_get_re_encryption_key(cm_Ptr, sk_Ptr, pk_Ptr);
+    PyObject* rk_Ptr = PyCapsule_New(rk_obj, "rk", NULL);
+   
+    return rk_Ptr;  
 }
 
-static PyObject* cryptomagic_get_re_encryption_key_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+static PyObject* cryptomagic_get_re_encryption_from_bytes_wrapper(PyObject *self, PyObject * args)
+{
+    PyObject* cm_obj;
+    PyObject* data;
+    
+    if (! PyArg_UnpackTuple( args, "from_bytes",2,2, &cm_obj, &data))
         return NULL;
 
-    PyObject* cm_Ptr = PyList_GetItem(listObj, 0);
-    PyObject* sk_Ptr = PyList_GetItem(listObj, 1);
-    PyObject* pk_Ptr = PyList_GetItem(listObj, 2);
-
-    cryptomagic_get_re_encryption_key(cm_Ptr, sk_Ptr, pk_Ptr);
-    Py_RETURN_NONE;
-}
-
-static PyObject* cryptomagic_get_re_encryption_from_bytes_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
-        return NULL;
-
-    PyObject* cm_Ptr = PyList_GetItem(listObj, 0);
-    PyObject* buffer = PyList_GetItem(listObj, 1); // convert to char**
-    PyObject* length = PyList_GetItem(listObj, 2); // convert to int*
-
-    cryptomagic_get_re_encryption_from_bytes(cm_Ptr, buffer, length);
-    Py_RETURN_NONE;
+    char* buffer = PyBytes_AsString(data);
+    void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm"); 
+    void* rk_obj = cryptomagic_get_re_encryption_from_bytes(cm_Ptr, buffer, strlen(buffer));
+    PyObject* rk_Ptr = PyCapsule_New(rk_obj, "rk", NULL);
+    return rk_Ptr;
 }
 
 
-static PyObject* cryptomagic_re_encryption_to_bytes_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+static PyObject* cryptomagic_re_encryption_to_bytes_wrapper(PyObject *self, PyObject * args)
+{
+    PyObject* rk_Ptr;
+    
+    if (! PyArg_UnpackTuple( args, "to_bytes",0,1, &rk_Ptr))
         return NULL;
 
-    PyObject* rk_Ptr = PyList_GetItem(listObj, 0);
-    PyObject* buffer = PyList_GetItem(listObj, 1); // convert to char**
-    PyObject* length = PyList_GetItem(listObj, 2); // convert to int*
+    char *buffer;
+    int length; 
 
-    cryptomagic_re_encryption_to_bytes(rk_Ptr, buffer, length);
-    Py_RETURN_NONE;
+    cryptomagic_re_encryption_to_bytes(PyCapsule_GetPointer(rk_Ptr, "rk"), &buffer, &length);
+    return PyBytes_FromString(buffer);
 }
 
-static PyObject* cryptomagic_re_encryption_key_free_wrapper(PyObject *self, PyObject * args){
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+static PyObject* cryptomagic_re_encryption_key_free_wrapper(PyObject *self, PyObject * args)
+{
+    PyObject* rk_Ptr;
+
+    if (! PyArg_UnpackTuple( args, "rk_obj",0,1, &rk_Ptr))
         return NULL;
 
-    PyObject* rk_Ptr = PyList_GetItem(listObj, 0);
-
-    cryptomagic_re_encryption_key_free(rk_Ptr);
+    cryptomagic_re_encryption_key_free(PyCapsule_GetPointer(rk_Ptr, "rk"));
     Py_RETURN_NONE;
 }
 
 static PyObject* cryptomagic_get_re_encryption_capsule_wrapper(PyObject *self, PyObject *args)
 {
-    PyObject* listObj;
-    if (! PyArg_ParseTuple( args, "O", &listObj))
+    PyObject* rk_obj;
+    PyObject* capsule_obj;
+
+    if (! PyArg_UnpackTuple( args, "cm_obj", 2, 2, &rk_obj, &capsule_obj))
         return NULL;
 
-    PyObject* cm_Ptr = PyList_GetItem(listObj, 0);
-    PyObject* capsule_Ptr = PyList_GetItem(listObj, 1);
-    PyObject* rk_Ptr = PyList_GetItem(listObj, 2);
-
+    void* cm_Ptr = PyCapsule_GetPointer(rk_obj, "cm"); 
+    void* rk_Ptr = PyCapsule_GetPointer(rk_obj, "rk"); 
+    void* capsule_Ptr = PyCapsule_GetPointer(capsule_obj, "capsule");
+    
     cryptomagic_get_re_encryption_capsule(cm_Ptr, capsule_Ptr, rk_Ptr);
-    Py_RETURN_NONE;
+    PyObject* capsule = PyCapsule_New(capsule_Ptr, "capsule", NULL);
+    return capsule; 
 }
-*/
+
 
 static PyMethodDef cryptomagic_methods[] = {
     {
@@ -269,57 +291,57 @@ static PyMethodDef cryptomagic_methods[] = {
     {
         "cryptomagic_generate_private_key", cryptomagic_generate_private_key_wrapper, METH_VARARGS,
     },
-    /*{
+    {
         "cryptomagic_private_key_free", cryptomagic_private_key_free_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_get_public_key_wrapper", cryptomagic_get_public_key_wrapper, METH_VARARGS,
-    },*/
+        "cryptomagic_get_public_key", cryptomagic_get_public_key_wrapper, METH_VARARGS,
+    },
     {
         "cryptomagic_private_key_to_bytes", cryptomagic_private_key_to_bytes_wrapper, METH_VARARGS,
-    },/*
-    {
-        "cryptomagic_public_key_to_bytes_wrapper", cryptomagic_public_key_to_bytes_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_private_key_from_bytes_wrapper", cryptomagic_private_key_from_bytes_wrapper, METH_VARARGS,
+        "cryptomagic_public_key_to_bytes", cryptomagic_public_key_to_bytes_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_public_key_from_bytes_wrapper", cryptomagic_public_key_from_bytes_wrapper, METH_VARARGS,
+        "cryptomagic_private_key_from_bytes", cryptomagic_private_key_from_bytes_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_public_key_free_wrapper", cryptomagic_public_key_free_wrapper, METH_VARARGS,
+        "cryptomagic_public_key_from_bytes", cryptomagic_public_key_from_bytes_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_encapsulate_wrapper", cryptomagic_encapsulate_wrapper, METH_VARARGS,
+        "cryptomagic_public_key_free", cryptomagic_public_key_free_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_capsule_free_wrapper", cryptomagic_capsule_free_wrapper, METH_VARARGS,
+        "cryptomagic_encapsulate", cryptomagic_encapsulate_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_decapsulate_wrapper", cryptomagic_decapsulate_wrapper, METH_VARARGS,
+        "cryptomagic_capsule_free", cryptomagic_capsule_free_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_capsule_to_bytes_wrapper", cryptomagic_capsule_to_bytes_wrapper, METH_VARARGS,
+        "cryptomagic_decapsulate", cryptomagic_decapsulate_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_capsule_from_bytes_wrapper", cryptomagic_capsule_from_bytes_wrapper, METH_VARARGS,
+        "cryptomagic_capsule_to_bytes", cryptomagic_capsule_to_bytes_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_get_re_encryption_key_wrapper", cryptomagic_get_re_encryption_key_wrapper, METH_VARARGS,
+        "cryptomagic_capsule_from_bytes", cryptomagic_capsule_from_bytes_wrapper, METH_VARARGS,
+    },
+    {
+        "cryptomagic_get_re_encryption_key", cryptomagic_get_re_encryption_key_wrapper, METH_VARARGS,
     }, 
     {
-        "cryptomagic_get_re_encryption_from_bytes_wrapper", cryptomagic_get_re_encryption_from_bytes_wrapper, METH_VARARGS,
+        "cryptomagic_get_re_encryption_from_bytes", cryptomagic_get_re_encryption_from_bytes_wrapper, METH_VARARGS,
     }, 
     {
-        "cryptomagic_re_encryption_to_bytes_wrapper", cryptomagic_re_encryption_to_bytes_wrapper, METH_VARARGS,
+        "cryptomagic_re_encryption_to_bytes", cryptomagic_re_encryption_to_bytes_wrapper, METH_VARARGS,
     }, 
     {
-        "cryptomagic_re_encryption_key_free_wrapper", cryptomagic_re_encryption_key_free_wrapper, METH_VARARGS,
+        "cryptomagic_re_encryption_key_free", cryptomagic_re_encryption_key_free_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_get_re_encryption_capsule_wrapper", cryptomagic_get_re_encryption_capsule_wrapper, METH_VARARGS,
-    },*/ 
+        "cryptomagic_get_re_encryption_capsule", cryptomagic_get_re_encryption_capsule_wrapper, METH_VARARGS,
+    }, 
     {NULL, NULL, 0, NULL}
 };
 

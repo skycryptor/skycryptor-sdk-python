@@ -2,15 +2,20 @@
 import cryptomagic
 
 #
-from crypto_magic import CryptoMagic, Key
+from crypto_magic import CryptoMagic
 
 #
-class PublicKey(Key):
+class PublicKey(CryptoMagic):
     def to_bytes(self):
-        pass
+        return cryptomagic.cryptomagic_public_key_to_bytes(self.get_pointer())
+
+    def from_bytes(self, data):
+        return cryptomagic.cryptomagic_public_key_from_bytes(self.get_pointer(), data)
 
     def encapsulate(self):
-        pass
+        cm = CryptoMagic()
+        cm.set_pointer(self.get_pointer())
+        return cryptomagic.cryptomagic_encapsulate(cm.get_pointer(),self.get_pointer())
 
     def free(self):
-        pass
+        cryptomagic.cryptomagic_public_key_free(self.get_pointer())
