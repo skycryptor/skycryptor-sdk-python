@@ -1,25 +1,36 @@
+#
 import cryptomagic
+import binascii
 
+#
 from crypto_magic import CryptoMagic
 from public_key import PublicKey
+from re_key import ReEncryptionKey
 
+#
 class PrivateKey(CryptoMagic):
+    def __init__(self, cm):
+        self.cm = cm
+        super().__init__()
+
     def generate(self):
         self.set_pointer(cryptomagic.cryptomagic_generate_private_key(self.get_pointer()))
 
     def get_public_key(self):
-        pk = PublicKey()
+        pk = PublicKey(CryptoMagic())
         pk.set_pointer(cryptomagic.cryptomagic_get_public_key(self.get_pointer()))
         return pk
 
     def to_bytes(self):
-        return cryptomagic.cryptomagic_private_key_to_bytes(self.get_pointer())
+        return binascii.hexlify(cryptomagic.cryptomagic_private_key_to_bytes(self.get_pointer()))
 
     def from_bytes(self, data):
-        return cryptomagic.cryptomagic_private_key_from_bytes(self.get_pointer(), data)
-
+        self.set_pointer(cryptomagic.cryptomagic_private_key_from_bytes(self.get_pointer(), binascii.unhexlify(data)))
+    
     def generate_re_encryption_key(self, pk):
-        return cryptomagic.cryptomagic_get_re_encryption_key(self.get_pointer(), pk.get_pointer())
+        rk = ReEncryptionKey()
+        rk.set_pointer(cryptomagic.cryptomagic_get_re_encryption_key(self.get_pointer(), pk.get_pointer(), self.cm.get_pointer()))
+        return rk
 
     def decapsulate(self, capsule):
         cm = CryptoMagic()

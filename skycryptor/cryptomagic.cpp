@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include "cryptomagic_c.h"
 #include <iostream>
-//#include <string.h>
+#include <tuple>
+#include <string.h>
 using namespace std;
 
 static PyObject* cryptomagic_init_wrapper(PyObject *self, PyObject *args) {
@@ -69,11 +70,12 @@ static PyObject* cryptomagic_private_key_to_bytes_wrapper(PyObject *self, PyObje
     int length; 
 
     cryptomagic_private_key_to_bytes(PyCapsule_GetPointer(sk_Ptr, "sk"), &buffer, &length);
-    return PyBytes_FromString(buffer);
+    return PyByteArray_FromStringAndSize(buffer, length);
 }
 
 static PyObject* cryptomagic_public_key_to_bytes_wrapper(PyObject *self, PyObject * args){
     PyObject* pk_Ptr;
+
     
     if (! PyArg_UnpackTuple( args, "to_bytes",0,1, &pk_Ptr))
         return NULL;
@@ -81,8 +83,8 @@ static PyObject* cryptomagic_public_key_to_bytes_wrapper(PyObject *self, PyObjec
     char *buffer;
     int length; 
 
-    cryptomagic_private_key_to_bytes(PyCapsule_GetPointer(pk_Ptr, "pk"), &buffer, &length);
-    return PyBytes_FromString(buffer);
+    cryptomagic_public_key_to_bytes(PyCapsule_GetPointer(pk_Ptr, "pk"), &buffer, &length);
+    return PyByteArray_FromStringAndSize(buffer, length);
 }
 
 static PyObject* cryptomagic_private_key_from_bytes_wrapper(PyObject *self, PyObject * args){
@@ -130,14 +132,19 @@ static PyObject* cryptomagic_encapsulate_wrapper(PyObject *self, PyObject * args
     
     if (! PyArg_UnpackTuple( args, "_obj", 2, 2, &cm_obj, &pk_obj))
         return NULL;
+ 
+    void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm");
+    void* pk_Ptr = PyCapsule_GetPointer(pk_obj, "pk");
 
     char *buffer;
     int length; 
-    void* capsule_obj = cryptomagic_encapsulate(cm_obj, pk_obj, &buffer, &length);
+    void* capsule_obj = cryptomagic_encapsulate(cm_Ptr, pk_Ptr, &buffer, &length);
     PyObject* capsule_Ptr = PyCapsule_New(capsule_obj, "capsule", NULL);
     PyObject* symmetric_key = PyBytes_FromString(buffer);
-   
-    return capsule_Ptr, symmetric_key; 
+ 
+    PyObject* tuple_Ptr = PyTuple_Pack(2, capsule_Ptr, symmetric_key);
+ 
+    return tuple_Ptr; 
 }
 
 static PyObject* cryptomagic_capsule_free_wrapper(PyObject *self, PyObject * args)
@@ -183,7 +190,7 @@ static PyObject* cryptomagic_capsule_to_bytes_wrapper(PyObject *self, PyObject *
     int length; 
 
     cryptomagic_capsule_to_bytes(PyCapsule_GetPointer(capsule_Ptr, "capsule"), &buffer, &length);
-    return PyBytes_FromString(buffer);
+    return PyByteArray_FromStringAndSize(buffer, length);
 }
 
 static PyObject* cryptomagic_capsule_from_bytes_wrapper(PyObject *self, PyObject * args)
@@ -203,19 +210,19 @@ static PyObject* cryptomagic_capsule_from_bytes_wrapper(PyObject *self, PyObject
 
 static PyObject* cryptomagic_get_re_encryption_key_wrapper(PyObject *self, PyObject * args)
 {
+    PyObject* cm_obj;
     PyObject* sk_obj;
     PyObject* pk_obj;
     
-    if (! PyArg_UnpackTuple( args, "from_bytes",2,2, &sk_obj, &pk_obj))
+    if (! PyArg_UnpackTuple( args, "from_bytes",3,3, &sk_obj, &pk_obj, &cm_obj))
         return NULL;
 
-    void * cm_Ptr = PyCapsule_GetPointer(sk_obj, "cm");
+    void * cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm");
     void * sk_Ptr = PyCapsule_GetPointer(sk_obj, "sk");
     void * pk_Ptr = PyCapsule_GetPointer(pk_obj, "pk");
 
     void* rk_obj = cryptomagic_get_re_encryption_key(cm_Ptr, sk_Ptr, pk_Ptr);
     PyObject* rk_Ptr = PyCapsule_New(rk_obj, "rk", NULL);
-   
     return rk_Ptr;  
 }
 
@@ -239,14 +246,14 @@ static PyObject* cryptomagic_re_encryption_to_bytes_wrapper(PyObject *self, PyOb
 {
     PyObject* rk_Ptr;
     
-    if (! PyArg_UnpackTuple( args, "to_bytes",0,1, &rk_Ptr))
+    if (! PyArg_UnpackTuple( args, "to_bytes",1,1, &rk_Ptr))
         return NULL;
 
     char *buffer;
     int length; 
 
     cryptomagic_re_encryption_to_bytes(PyCapsule_GetPointer(rk_Ptr, "rk"), &buffer, &length);
-    return PyBytes_FromString(buffer);
+    return PyByteArray_FromStringAndSize(buffer, length);
 }
 
 static PyObject* cryptomagic_re_encryption_key_free_wrapper(PyObject *self, PyObject * args)
