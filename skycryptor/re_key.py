@@ -3,7 +3,7 @@ import binascii
 import cryptomagic
 
 #
-from crypto_magic import CryptoMagic
+from .crypto_magic import CryptoMagic
 
 #
 class ReEncryptionKey(CryptoMagic):

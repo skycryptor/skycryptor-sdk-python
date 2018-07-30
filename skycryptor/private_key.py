@@ -3,9 +3,9 @@ import cryptomagic
 import binascii
 
 #
-from crypto_magic import CryptoMagic
-from public_key import PublicKey
-from re_key import ReEncryptionKey
+from .crypto_magic import CryptoMagic
+from .public_key import PublicKey
+from .re_key import ReEncryptionKey
 
 #
 class PrivateKey(CryptoMagic):

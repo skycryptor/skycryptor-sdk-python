@@ -3,8 +3,8 @@ import binascii
 import cryptomagic
 
 #
-from crypto_magic import CryptoMagic
-from capsule import Capsule
+from .crypto_magic import CryptoMagic
+from .capsule import Capsule
 
 #
 class PublicKey(CryptoMagic):

@@ -2,11 +2,11 @@
 import cryptomagic
 
 #
-from crypto_magic import CryptoMagic
-from private_key import PrivateKey
-from public_key import PublicKey
-from capsule import Capsule
-from re_key import ReEncryptionKey
+from .crypto_magic import CryptoMagic
+from .private_key import PrivateKey
+from .public_key import PublicKey
+from .capsule import Capsule
+from .re_key import ReEncryptionKey
 
 #
 class SkyCryptor(CryptoMagic):
