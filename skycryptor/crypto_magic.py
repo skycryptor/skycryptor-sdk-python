@@ -1,7 +1,19 @@
+#
 import cryptomagic
 
+#
 class CryptoMagic:
+    """
+    Main Crypto operations structure, which is a Python implementation 
+    of existing C/C++ library interface
+    """
+
     def __init__(self):
+        """
+        Making new CryptoMagic root object to perform cryptographic operations.
+
+        :param no:
+        """
         self.__pointer = cryptomagic.cryptomagic_new()
 
     def get_pointer(self):
@@ -9,6 +21,3 @@ class CryptoMagic:
 
     def set_pointer(self, pointer):
         self.__pointer = pointer
-
-    def clear(self):
-        cryptomagic.cryptomagic_clear(self.pointer)
