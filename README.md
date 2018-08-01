@@ -75,13 +75,13 @@ from skycryptor.capule import Capsule
 
 ....
 
-  // Initialize new Skycryptor context from the default encryption context 
+  # Initialize new Skycryptor context from the default encryption context 
   sc = Skycryptor()
 ```
 
 #### Generate User's Public and Private Keys  
 ```
-  // randomly generates the private key and corresponding public key 
+  # randomly generates the private key and corresponding public key 
   alice_private_key = sc.generate()
   alice_public_key = alice_private_key.get_public_key()
   
@@ -91,16 +91,16 @@ from skycryptor.capule import Capsule
 ```
 #### Generate random symmetric key and encapsulate it with the Alice's Public Key 
 ```
-  // Encapsulate function is a Diffie-Hellman style key exchange with randomly generated temprorary keys and Alice Public Key. 
-  // It returns both the exchanged symmetric key and the capsule which can be decapsulated later by the corresponding private key
-  // The generated symmetric_key can be used to protect and data object. 
+  # Encapsulate function is a Diffie-Hellman style key exchange with randomly generated temprorary keys and Alice Public Key. 
+  # It returns both the exchanged symmetric key and the capsule which can be decapsulated later by the corresponding private key
+  # The generated symmetric_key can be used to protect and data object. 
   capsule, symmetric_key = alice_public_key.encapsulate()
   
 ```
 
 #### Revealing the symmetric key by unlocking the original capsule
 ```
-  // Alice can unlock the capsule and reveals the symmetric encryption key with her own private key
+  # Alice can unlock the capsule and reveals the symmetric encryption key with her own private key
   
   symmetric_key_1 = alice_private_key.decapsulate(capsule)
   if symmetric_key != symmetric_key_1:
@@ -111,16 +111,16 @@ from skycryptor.capule import Capsule
 
 #### Re-Encryption Key Generation
 ```
-  // Alice can create re-encryption key for Bob, which can later be used by the Proxy Service for transform capsules,  
-  // locked under Alice's public  key, to another capsule locked under  Bob's public key
+  # Alice can create re-encryption key for Bob, which can later be used by the Proxy Service for transform capsules,  
+  # locked under Alice's public  key, to another capsule locked under  Bob's public key
   
   re_key_alice_bob = alice_private_key.generate_re_encryption_key(bob_public_key)
 ```
 
 #### Capsule Transformation (Re-Encryption)
 ```
-  // Given the re-encryption key re_key_alice_bob, the Proxy Service can transform the capsule locked under Alice's public key, 
-  // to another capsule, which is already locked under Bob's public key
+  # Given the re-encryption key re_key_alice_bob, the Proxy Service can transform the capsule locked under Alice's public key, 
+  # to another capsule, which is already locked under Bob's public key
   
   transformed_capsule = re_key_alice_bob.re_encrypt(capsule)
 ```
@@ -128,7 +128,7 @@ from skycryptor.capule import Capsule
 
 #### Recovering the symmetric key by unlocking the transformed (re-encrypted) capsule
 ```
-  // Bob can unlock the transformed capsule and reveal the symmetric encryption key with his own private key
+  # Bob can unlock the transformed capsule and reveal the symmetric encryption key with his own private key
   
   symmetric_key_2 = bob_private_key.decapsulate(transformed_capsule)
   if symmetric_key_1 == symmetric_key_1:
