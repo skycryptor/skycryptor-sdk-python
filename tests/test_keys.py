@@ -1,17 +1,17 @@
 #
 import sys
-sys.path.insert(0,'/home/gegham/Desktop/skycryptor-sdk-python')
-
-#
-import skycryptor
-import binascii
+from os.path import dirname, abspath
 
 #
 from cryptomagic_test import TestCryptoMagic
 
-from skycryptor.skycryptor import SkyCryptor 
-from skycryptor.private_key import PrivateKey
-from skycryptor.public_key import PublicKey 
+from skycryptor.skycryptor import SkyCryptor
+
+#
+BASE_DIR = dirname(dirname(abspath(__file__)))
+sys.path.insert(0, BASE_DIR)
+
+
 #
 class KeyFromToBytes(TestCryptoMagic):
     #
@@ -21,8 +21,8 @@ class KeyFromToBytes(TestCryptoMagic):
     #
     def test_public_key_from_to_bytes(self):
         sc = SkyCryptor()
-        sk = sc.generate()  
- 
+        sk = sc.generate()
+
         pk_1 = sk.get_public_key()
 
         pk_data_1 = pk_1.to_bytes()
@@ -32,13 +32,12 @@ class KeyFromToBytes(TestCryptoMagic):
 
         self.assertEqual(pk_data_1, pk_data_2)
 
-
     def test_private_key_from_to_bytes(self):
         sc = SkyCryptor()
-        sk_1 = sc.generate()  
-        
+        sk_1 = sc.generate()
+
         sk_data_1 = sk_1.to_bytes()
         sk_2 = sc.private_key_from_bytes(sk_data_1)
-      
+
         sk_data_2 = sk_2.to_bytes()
-        self.assertEqual(sk_data_1, sk_data_2) 
+        self.assertEqual(sk_data_1, sk_data_2)

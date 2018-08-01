@@ -5,6 +5,7 @@ import cryptomagic
 #
 from .crypto_magic import CryptoMagic
 
+
 #
 class Capsule(CryptoMagic):
     """
@@ -25,7 +26,7 @@ class Capsule(CryptoMagic):
         Get capsule key from given byte array.
 
         :param data: byte array
-        :return: no  
+        :return: no
         """
 
         self.set_pointer(cryptomagic.cryptomagic_capsule_from_bytes(self.get_pointer(), binascii.unhexlify(data)))

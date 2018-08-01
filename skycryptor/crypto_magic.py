@@ -1,10 +1,11 @@
 #
 import cryptomagic
 
+
 #
 class CryptoMagic:
     """
-    Main Crypto operations structure, which is a Python implementation 
+    Main Crypto operations structure, which is a Python implementation
     of existing C/C++ library interface
     """
 

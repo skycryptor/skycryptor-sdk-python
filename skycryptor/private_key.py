@@ -7,6 +7,7 @@ from .crypto_magic import CryptoMagic
 from .public_key import PublicKey
 from .re_key import ReEncryptionKey
 
+
 #
 class PrivateKey(CryptoMagic):
     """
@@ -51,10 +52,10 @@ class PrivateKey(CryptoMagic):
         :param data: byte array
         """
         self.set_pointer(cryptomagic.cryptomagic_private_key_from_bytes(self.get_pointer(), binascii.unhexlify(data)))
-    
+
     def generate_re_encryption_key(self, pk):
         """
-        Generate ReEncryption key for 
+        Generate ReEncryption key for
         given Public key with our Private key
 
         :param pk: Public Key obj
@@ -75,4 +76,4 @@ class PrivateKey(CryptoMagic):
 
         cm = CryptoMagic()
         cm.set_pointer(self.get_pointer())
-        return cryptomagic.cryptomagic_decapsulate(cm.get_pointer(),self.get_pointer(), capsule.get_pointer())
+        return cryptomagic.cryptomagic_decapsulate(cm.get_pointer(), self.get_pointer(), capsule.get_pointer())

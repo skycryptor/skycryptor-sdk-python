@@ -1,17 +1,17 @@
+#
 import sys
-sys.path.insert(0,'/home/gegham/Desktop/skycryptor-sdk-python')
+from os.path import dirname, abspath
 
 #
-import skycryptor
-
-#
-from skycryptor import cryptomagic
+from cryptomagic_test import TestCryptoMagic
 
 #
 from skycryptor.skycryptor import SkyCryptor
-from skycryptor.private_key import PrivateKey
-from skycryptor.public_key import PublicKey 
-from cryptomagic_test import TestCryptoMagic
+
+#
+BASE_DIR = dirname(dirname(abspath(__file__)))
+sys.path.insert(0, BASE_DIR)
+
 
 #
 class Capsule(TestCryptoMagic):
@@ -24,7 +24,7 @@ class Capsule(TestCryptoMagic):
         sc = SkyCryptor()
         sk = sc.generate()
         pk = sk.get_public_key()
-       
+
         capsule_1, _ = pk.encapsulate()
         cData_1 = capsule_1.to_bytes()
         capsule_2 = sc.capsule_from_bytes(cData_1)
@@ -44,6 +44,3 @@ class Capsule(TestCryptoMagic):
         cData_2 = capsule_2.to_bytes()
 
         self.assertEqual(cData_1, cData_2)
- 
-
-

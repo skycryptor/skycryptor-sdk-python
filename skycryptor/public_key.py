@@ -6,10 +6,11 @@ import cryptomagic
 from .crypto_magic import CryptoMagic
 from .capsule import Capsule
 
+
 #
 class PublicKey(CryptoMagic):
     """
-    PublicKey object, which is Python implementation of 
+    PublicKey object, which is Python implementation of
     extended C/C++ library interface
     """
 
@@ -32,7 +33,7 @@ class PublicKey(CryptoMagic):
         Get Public Key from given byte array.
 
         :param data: byte array
-        :return: no  
+        :return: no
         """
 
         self.set_pointer(cryptomagic.cryptomagic_public_key_from_bytes(self.get_pointer(), binascii.unhexlify(data)))
@@ -46,6 +47,6 @@ class PublicKey(CryptoMagic):
 
         """
         capsule = Capsule()
-        capsule_pointer, symmetric_key = cryptomagic.cryptomagic_encapsulate(self.cm.get_pointer(),self.get_pointer())
-        capsule.set_pointer(capsule_pointer) 
+        capsule_pointer, symmetric_key = cryptomagic.cryptomagic_encapsulate(self.cm.get_pointer(), self.get_pointer())
+        capsule.set_pointer(capsule_pointer)
         return capsule, symmetric_key
