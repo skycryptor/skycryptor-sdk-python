@@ -1,7 +1,6 @@
 #
 import os
 import shutil
-from sysconfig import get_paths
 
 #
 from distutils.core import setup, Extension
@@ -10,7 +9,7 @@ from distutils.command.clean import clean
 from subprocess import check_output
 
 #
-cryptomagic_module = Extension('cryptomagic', sources = ['skycryptor/cryptomagic.cpp'], include_dirs = [get_paths()], extra_compile_args=["-fPIC", "-std=c++11"], language="c++", extra_link_args=['skycryptor/libcryptomagic.a', "-lstdc++", "-lssl", "-lcrypto"])
+cryptomagic_module = Extension('cryptomagic', sources = ['skycryptor/cryptomagic.cpp'], extra_compile_args=["-fPIC", "-std=c++11"], language="c++", extra_link_args=['skycryptor/libcryptomagic.a', "-lstdc++", "-lssl", "-lcrypto"])
 
 #
 class BuilderClass(build_py):
@@ -38,7 +37,7 @@ class CleanClass(clean):
     SOURCE_DIR=os.getcwd()
     
     def run(self):
-        os.system("cp build/lib.linux-x86_64-2.7/cryptomagic.so {}/skycryptor".format(self.SOURCE_DIR))
+        os.system("cp build/lib.linux-x86_64-3.5/* {}/skycryptor/cryptomagic.so".format(self.SOURCE_DIR))
         shutil.rmtree("{}".format("build"))
 
 #

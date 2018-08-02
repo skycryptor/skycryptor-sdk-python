@@ -1,11 +1,7 @@
 #include "Python.h"
 #include <stdio.h>
 #include "cryptomagic_c.h"
-#include <iostream>
-#include <tuple>
-#include <string.h>
-using namespace std;
-
+#include <string>
 
 void pycapsule_destructor(PyObject * obj)
 {
