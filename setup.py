@@ -1,6 +1,8 @@
 #
 import os
 import shutil
+from sysconfig import get_paths
+
 #
 from distutils.core import setup, Extension
 from distutils.command.build_py import build_py
@@ -8,10 +10,7 @@ from distutils.command.clean import clean
 from subprocess import check_output
 
 #
-python3_headers = check_output(["python3-config", "--includes"])
-
-#
-cryptomagic_module = Extension('cryptomagic', sources = ['skycryptor/cryptomagic.cpp'], include_dirs = ["/usr/include/python3.5m",], extra_compile_args=["-fPIC", "-std=c++11"], language="c++", extra_link_args=['skycryptor/libcryptomagic.a', "-lstdc++", "-lssl", "-lcrypto"])
+cryptomagic_module = Extension('cryptomagic', sources = ['skycryptor/cryptomagic.cpp'], include_dirs = [get_paths()], extra_compile_args=["-fPIC", "-std=c++11"], language="c++", extra_link_args=['skycryptor/libcryptomagic.a', "-lstdc++", "-lssl", "-lcrypto"])
 
 #
 class BuilderClass(build_py):
@@ -34,6 +33,7 @@ class BuilderClass(build_py):
       os.chdir("{}".format(self.SOURCE_DIR))
       shutil.rmtree("{}".format(self.LIBNAME))
 
+#
 class CleanClass(clean):
     SOURCE_DIR=os.getcwd()
     
