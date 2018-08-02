@@ -154,13 +154,13 @@ if __name__ == "__main__":
     # Generating Private, Public keys randomly 
     skA = sc.generate()
     pkA = skA.get_public_key()
-    print("Private Key bytes: {}".format(skA.ToBytes()))
-    print("Public Key bytes: {}".format(pkA.ToBytes()))
+    print("Private Key bytes: {}".format(skA.to_bytes()))
+    print("Public Key bytes: {}".format(pkA.to_bytes()))
   
     # Encapsulating and getting encryption capsule and symmetric key bytes 
     capsule, symmetric_key = pkA.encapsulate()
-    print("Capsule Buffer: {}".format(capsule.ToBytes()))
-    print("Symmetric Key Buffer: {}".format(symmetricKey.ToBytes()))
+    print("Capsule Buffer: {}".format(capsule.to_bytes()))
+    print("Symmetric Key Buffer: {}".format(symmetric_key.to_bytes()))
 
 ```
 This basic example demonstrates how to generate random keys, get them as a basic byte arrays, get encryption capsule and symmetric key as a byte buffer out of the generated public key.
