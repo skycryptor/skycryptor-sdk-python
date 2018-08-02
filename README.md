@@ -51,8 +51,8 @@ This is a standard Python package, but it requires to install OpenSSL package se
 
 # Compile Skycryptor C++ library and combine it with SDK
 ~# cd skycryptor-sdk-python
-~# python setup.py build
-~# python setup.py clean
+~# python3 setup.py build
+~# python3 setup.py clean
 ```
 
 ## Usage Examples
