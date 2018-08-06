@@ -73,28 +73,27 @@ class Capsule(TestCryptoMagic):
 
         self.assertEqual(cData_1, cData_2)
 
-#    def test_AES_encrypt_decrypt(self):
-#        sc = SkyCryptor()
-#        alice_sk = sc.generate()
-#        alice_pk = alice_sk.get_public_key()
-#
-#        bob_sk = sc.generate()
-#        bob_pk = bob_sk.get_public_key()
-#
-#        capsule, symmetric_key_1 = bob_pk.encapsulate()
-#
-#        alice_cipher = AESCipher(binascii.hexlify(symmetric_key_1)[:16])
-#
-#
-#        plaintext = 'abkcdcln;lfwenhcbehkslascn.osbo'
-#        encrypted = alice_cipher.encrypt(plaintext)
-#
-#        symmetric_key_2 = bob_sk.decapsulate(capsule)
-#        bob_cipher = AESCipher(binascii.hexlify(symmetric_key_2)[:16])
-#
-#        decrypted = bob_cipher.decrypt(encrypted)
-#
-#        self.assertEqual(decrypted, plaintext)
+    def test_AES_encrypt_decrypt(self):
+        sc = SkyCryptor()
+        alice_sk = sc.generate()
+        alice_pk = alice_sk.get_public_key()
+
+        bob_sk = sc.generate()
+        bob_pk = bob_sk.get_public_key()
+
+        capsule, symmetric_key_1 = bob_pk.encapsulate()
+
+        alice_cipher = AESCipher(binascii.hexlify(symmetric_key_1)[:16])
+
+        plaintext = 'abkcdcln;lfwenhcbehkslascn.osbo'
+        encrypted = alice_cipher.encrypt(plaintext)
+
+        symmetric_key_2 = bob_sk.decapsulate(capsule)
+        bob_cipher = AESCipher(binascii.hexlify(symmetric_key_2)[:16])
+
+        decrypted = bob_cipher.decrypt(encrypted)
+
+        self.assertEqual(decrypted, plaintext)
 
     def test_AES_encrypt_decrypt_re_encrypt(self):
         sc = SkyCryptor()
@@ -106,11 +105,20 @@ class Capsule(TestCryptoMagic):
         bob_pk = bob_sk.get_public_key()
 
         alice_capsule, alice_symmetric_key = alice_pk.encapsulate()
-        
 
         rk_AB = alice_sk.generate_re_encryption_key(bob_pk)
+ 
+        alice_cipher = AESCipher(binascii.hexlify(alice_symmetric_key)[:16])
+
+        plaintext = 'abkcdclnlfwenhcbehkslascnosbo'
+        ciphertext = alice_cipher.encrypt(plaintext)
+
         recapsule = rk_AB.re_encrypt(alice_capsule)
-         
+
         bob_symmetric_key = bob_sk.decapsulate(recapsule)
+        bob_cipher = AESCipher(binascii.hexlify(bob_symmetric_key)[:16])
+       
+        decrypted = bob_cipher.decrypt(ciphertext)
 
         self.assertEqual(binascii.hexlify(alice_symmetric_key), binascii.hexlify(bob_symmetric_key))
+        self.assertEqual(decrypted, plaintext)

@@ -25,7 +25,7 @@ class ReEncryptionKey(CryptoMagic):
         recapsule = Capsule()
         capsule_pointer = cryptomagic.cryptomagic_get_re_encryption_capsule(self.cm.get_pointer(), capsule.get_pointer(), self.get_pointer())
         recapsule.set_pointer(capsule_pointer)
-        return capsule
+        return recapsule
 
     def to_bytes(self):
         """
