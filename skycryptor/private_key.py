@@ -74,4 +74,4 @@ class PrivateKey(CryptoMagic):
         :return symmetric key:
         """
 
-        return cryptomagic.cryptomagic_decapsulate(self.cm.get_pointer(), self.get_pointer().capsule.get_pointer())
+        return cryptomagic.cryptomagic_decapsulate(self.cm.get_pointer(), self.get_pointer(), capsule.get_pointer())
