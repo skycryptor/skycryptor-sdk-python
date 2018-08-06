@@ -1,5 +1,7 @@
 #
-import sys
+import os
+path = os.environ["package"]
+os.sys.path.append(path)
 from os.path import dirname, abspath
 
 #
@@ -8,8 +10,8 @@ from cryptomagic_test import TestCryptoMagic
 from skycryptor.skycryptor import SkyCryptor
 
 #
-BASE_DIR = dirname(dirname(abspath(__file__)))
-sys.path.insert(0, BASE_DIR)
+#BASE_DIR = dirname(dirname(abspath(__file__)))
+#sys.path.insert(0, BASE_DIR)
 
 
 #

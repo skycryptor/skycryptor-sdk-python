@@ -62,7 +62,7 @@ class PrivateKey(CryptoMagic):
         :return rk: generated re-encryption key
         """
 
-        rk = ReEncryptionKey()
+        rk = ReEncryptionKey(CryptoMagic())
         rk.set_pointer(cryptomagic.cryptomagic_get_re_encryption_key(self.get_pointer(), pk.get_pointer(), self.cm.get_pointer()))
         return rk
 
@@ -74,6 +74,4 @@ class PrivateKey(CryptoMagic):
         :return symmetric key:
         """
 
-        cm = CryptoMagic()
-        cm.set_pointer(self.get_pointer())
-        return cryptomagic.cryptomagic_decapsulate(cm.get_pointer(), self.get_pointer(), capsule.get_pointer())
+        return cryptomagic.cryptomagic_decapsulate(self.cm.get_pointer(), self.get_pointer().capsule.get_pointer())

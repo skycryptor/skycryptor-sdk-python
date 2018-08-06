@@ -174,8 +174,8 @@ static PyObject* cryptomagic_decapsulate_wrapper(PyObject *self, PyObject * args
     void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm");
     void* sk_Ptr = PyCapsule_GetPointer(sk_obj, "sk");
     void* capsule_Ptr = PyCapsule_GetPointer(capsule_obj, "capsule");
-    cryptomagic_decapsulate(cm_Ptr, sk_Ptr, capsule_Ptr, &buffer, &length);
-    PyObject* symmetric_key = PyBytes_FromString(buffer);
+    cryptomagic_decapsulate(cm_Ptr, capsule_Ptr, sk_Ptr, &buffer, &length);
+    PyObject* symmetric_key = PyByteArray_FromStringAndSize(buffer, length);
    
     return symmetric_key; 
 }
@@ -261,10 +261,11 @@ static PyObject* cryptomagic_re_encryption_to_bytes_wrapper(PyObject *self, PyOb
 
 static PyObject* cryptomagic_get_re_encryption_capsule_wrapper(PyObject *self, PyObject *args)
 {
-    PyObject* rk_obj;
+    PyObject* cm_obj;
     PyObject* capsule_obj;
+    PyObject* rk_obj;
 
-    if (! PyArg_UnpackTuple( args, "cm_obj", 2, 2, &rk_obj, &capsule_obj))
+    if (! PyArg_UnpackTuple( args, "cm_obj", 2, 2, &cm_obj, &capsule_obj, &rk_obj))
         return NULL;
 
     void* cm_Ptr = PyCapsule_GetPointer(rk_obj, "cm"); 

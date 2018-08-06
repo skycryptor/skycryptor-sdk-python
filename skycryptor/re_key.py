@@ -4,10 +4,16 @@ import cryptomagic
 
 #
 from .crypto_magic import CryptoMagic
+from .capsule import Capsule
 
 
 #
 class ReEncryptionKey(CryptoMagic):
+    
+    def __init__(self, cm):
+        self.cm = cm
+        super().__init__()
+
     def re_encrypt(self, capsule):
         """
         Running re-encryption for given capsule and returning re-encrypted capsule
@@ -16,8 +22,10 @@ class ReEncryptionKey(CryptoMagic):
         :return recapsule: re-encrypted capsule
         """
 
-        recapsule = cryptomagic.cryptomagic_get_re_encryption_capsule(self.get_pointer(), capsule.get_pointer())
-        return recapsule
+        capsule = Capsule()
+        capsule_pointer = cryptomagic.cryptomagic_get_re_encryption_capsule(self.cm.get_pointer(), capsule.get_pointer(), self.get_pointer())
+        capsule.set_pointer(capsule_pointer)
+        return capsule
 
     def to_bytes(self):
         """
