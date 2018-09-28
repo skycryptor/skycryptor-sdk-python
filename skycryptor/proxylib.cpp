@@ -1,6 +1,6 @@
 #include "Python.h"
 #include <stdio.h>
-#include "cryptomagic_c.h"
+#include "proxy_c.h"
 #include <string>
 
 void pycapsule_destructor(PyObject * obj)
@@ -11,44 +11,44 @@ void pycapsule_destructor(PyObject * obj)
  
     if (name == "cm")
     {
-        cryptomagic_clear(obj_Ptr);
+        proxylib_clear(obj_Ptr);
     }
     else if (name == "sk")
     {
-        cryptomagic_private_key_free(obj_Ptr);
+        proxylib_private_key_free(obj_Ptr);
     }
     else if(name == "pk")
     {
-        cryptomagic_public_key_free(obj_Ptr);
+        proxylib_public_key_free(obj_Ptr);
     }
     else if(name == "rk")
     {
-        cryptomagic_re_encryption_key_free(obj_Ptr);
+        proxylib_re_encryption_key_free(obj_Ptr);
     }
     else if(name == "capsule")
     {
-        cryptomagic_capsule_free(obj_Ptr);
+        proxylib_capsule_free(obj_Ptr);
     }
     else{
     }
 }
 
-static PyObject* cryptomagic_init_wrapper(PyObject *self, PyObject *args) 
+static PyObject* proxylib_init_wrapper(PyObject *self, PyObject *args) 
 {
-    cryptomagic_init();
+    proxylib_init();
     Py_RETURN_NONE;    
 }
 
 
-static PyObject* cryptomagic_new_wrapper(PyObject *self, PyObject *args) 
+static PyObject* proxylib_new_wrapper(PyObject *self, PyObject *args) 
 {
-    void* cm_obj = cryptomagic_new();
+    void* cm_obj = proxylib_new();
     PyObject* cm_Ptr = PyCapsule_New(cm_obj, "cm", &pycapsule_destructor);
     PyCapsule_SetName(cm_Ptr, "cm");
     return cm_Ptr;
 }
 
-static PyObject* cryptomagic_generate_private_key_wrapper(PyObject *self, PyObject *args) 
+static PyObject* proxylib_generate_private_key_wrapper(PyObject *self, PyObject *args) 
 {
     PyObject* cm_obj;
 
@@ -56,26 +56,26 @@ static PyObject* cryptomagic_generate_private_key_wrapper(PyObject *self, PyObje
         return NULL;
 
     void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm");
-    void* sk_Ptr = cryptomagic_generate_private_key(cm_Ptr);
+    void* sk_Ptr = proxylib_generate_private_key(cm_Ptr);
     PyObject* sk = PyCapsule_New(sk_Ptr, "sk", &pycapsule_destructor); 
     PyCapsule_SetName(sk, "sk");
     return sk;
 }
 
-static PyObject* cryptomagic_get_public_key_wrapper(PyObject *self, PyObject * args)
+static PyObject* proxylib_get_public_key_wrapper(PyObject *self, PyObject * args)
 {
     PyObject* sk_Ptr;
 
     if (! PyArg_UnpackTuple( args, "sk_obj",0,1, &sk_Ptr))
         return NULL;
 
-    void* pk_Ptr = cryptomagic_get_public_key(PyCapsule_GetPointer(sk_Ptr, "sk"));
+    void* pk_Ptr = proxylib_get_public_key(PyCapsule_GetPointer(sk_Ptr, "sk"));
     PyObject* pk = PyCapsule_New(pk_Ptr, "pk", &pycapsule_destructor);
     PyCapsule_SetName(pk, "pk");
     return pk;
 }
 
-static PyObject* cryptomagic_private_key_to_bytes_wrapper(PyObject *self, PyObject * args)
+static PyObject* proxylib_private_key_to_bytes_wrapper(PyObject *self, PyObject * args)
 {
     PyObject* sk_Ptr;
     
@@ -85,11 +85,11 @@ static PyObject* cryptomagic_private_key_to_bytes_wrapper(PyObject *self, PyObje
     char *buffer;
     int length; 
 
-    cryptomagic_private_key_to_bytes(PyCapsule_GetPointer(sk_Ptr, "sk"), &buffer, &length);
+    proxylib_private_key_to_bytes(PyCapsule_GetPointer(sk_Ptr, "sk"), &buffer, &length);
     return PyByteArray_FromStringAndSize(buffer, length);
 }
 
-static PyObject* cryptomagic_public_key_to_bytes_wrapper(PyObject *self, PyObject * args)
+static PyObject* proxylib_public_key_to_bytes_wrapper(PyObject *self, PyObject * args)
 {
     PyObject* pk_Ptr;
 
@@ -100,11 +100,11 @@ static PyObject* cryptomagic_public_key_to_bytes_wrapper(PyObject *self, PyObjec
     char *buffer;
     int length; 
 
-    cryptomagic_public_key_to_bytes(PyCapsule_GetPointer(pk_Ptr, "pk"), &buffer, &length);
+    proxylib_public_key_to_bytes(PyCapsule_GetPointer(pk_Ptr, "pk"), &buffer, &length);
     return PyByteArray_FromStringAndSize(buffer, length);
 }
 
-static PyObject* cryptomagic_private_key_from_bytes_wrapper(PyObject *self, PyObject * args)
+static PyObject* proxylib_private_key_from_bytes_wrapper(PyObject *self, PyObject * args)
 {
     PyObject* cm_obj;
     PyObject* data;
@@ -114,13 +114,13 @@ static PyObject* cryptomagic_private_key_from_bytes_wrapper(PyObject *self, PyOb
 
     const char* buffer = PyBytes_AsString(data);
     void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm"); 
-    void* sk_obj = cryptomagic_private_key_from_bytes(cm_Ptr, buffer, strlen(buffer));
+    void* sk_obj = proxylib_private_key_from_bytes(cm_Ptr, buffer, strlen(buffer));
     PyObject* sk_Ptr = PyCapsule_New(sk_obj, "sk", &pycapsule_destructor);
     PyCapsule_SetName(sk_Ptr, "sk");
     return sk_Ptr;
 }
 
-static PyObject* cryptomagic_public_key_from_bytes_wrapper(PyObject *self, PyObject * args)
+static PyObject* proxylib_public_key_from_bytes_wrapper(PyObject *self, PyObject * args)
 {
     PyObject* cm_obj;
     PyObject* data;
@@ -130,13 +130,13 @@ static PyObject* cryptomagic_public_key_from_bytes_wrapper(PyObject *self, PyObj
 
     char* buffer = PyBytes_AsString(data);
     void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm"); 
-    void* pk_obj = cryptomagic_public_key_from_bytes(cm_Ptr, buffer, strlen(buffer));
+    void* pk_obj = proxylib_public_key_from_bytes(cm_Ptr, buffer, strlen(buffer));
     PyObject* pk_Ptr = PyCapsule_New(pk_obj, "pk", &pycapsule_destructor);
     PyCapsule_SetName(pk_Ptr, "pk");
     return pk_Ptr;
 }
 
-static PyObject* cryptomagic_encapsulate_wrapper(PyObject *self, PyObject * args)
+static PyObject* proxylib_encapsulate_wrapper(PyObject *self, PyObject * args)
 {
     PyObject* cm_obj;
     PyObject* pk_obj;
@@ -149,17 +149,17 @@ static PyObject* cryptomagic_encapsulate_wrapper(PyObject *self, PyObject * args
 
     char *buffer;
     int length; 
-    void* capsule_obj = cryptomagic_encapsulate(cm_Ptr, pk_Ptr, &buffer, &length);
+    void* capsule_obj = proxylib_encapsulate(cm_Ptr, pk_Ptr, &buffer, &length);
     PyObject* capsule_Ptr = PyCapsule_New(capsule_obj, "capsule", &pycapsule_destructor);
     PyCapsule_SetName(capsule_Ptr, "capsule");
-    PyObject* symmetric_key = PyBytes_FromString(buffer);
+    PyObject* symmetric_key = PyBytes_FromStringAndSize(buffer, length);
  
     PyObject* tuple_Ptr = PyTuple_Pack(2, capsule_Ptr, symmetric_key);
  
     return tuple_Ptr; 
 }
 
-static PyObject* cryptomagic_decapsulate_wrapper(PyObject *self, PyObject * args)
+static PyObject* proxylib_decapsulate_wrapper(PyObject *self, PyObject * args)
 {
     PyObject* cm_obj;
     PyObject* sk_obj;
@@ -174,13 +174,13 @@ static PyObject* cryptomagic_decapsulate_wrapper(PyObject *self, PyObject * args
     void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm");
     void* sk_Ptr = PyCapsule_GetPointer(sk_obj, "sk");
     void* capsule_Ptr = PyCapsule_GetPointer(capsule_obj, "capsule");
-    cryptomagic_decapsulate(cm_Ptr, capsule_Ptr, sk_Ptr, &buffer, &length);
+    proxylib_decapsulate(cm_Ptr, capsule_Ptr, sk_Ptr, &buffer, &length);
     PyObject* symmetric_key = PyByteArray_FromStringAndSize(buffer, length);
    
     return symmetric_key; 
 }
 
-static PyObject* cryptomagic_capsule_to_bytes_wrapper(PyObject *self, PyObject * args)
+static PyObject* proxylib_capsule_to_bytes_wrapper(PyObject *self, PyObject * args)
 {
     PyObject* capsule_Ptr;
     
@@ -190,11 +190,11 @@ static PyObject* cryptomagic_capsule_to_bytes_wrapper(PyObject *self, PyObject *
     char *buffer;
     int length; 
 
-    cryptomagic_capsule_to_bytes(PyCapsule_GetPointer(capsule_Ptr, "capsule"), &buffer, &length);
+    proxylib_capsule_to_bytes(PyCapsule_GetPointer(capsule_Ptr, "capsule"), &buffer, &length);
     return PyByteArray_FromStringAndSize(buffer, length);
 }
 
-static PyObject* cryptomagic_capsule_from_bytes_wrapper(PyObject *self, PyObject * args)
+static PyObject* proxylib_capsule_from_bytes_wrapper(PyObject *self, PyObject * args)
 {
     PyObject* cm_obj;
     PyObject* data;
@@ -204,13 +204,13 @@ static PyObject* cryptomagic_capsule_from_bytes_wrapper(PyObject *self, PyObject
 
     char* buffer = PyBytes_AsString(data);
     void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm"); 
-    void* capsule_obj = cryptomagic_capsule_from_bytes(cm_Ptr, buffer, strlen(buffer));
+    void* capsule_obj = proxylib_capsule_from_bytes(cm_Ptr, buffer, strlen(buffer));
     PyObject* capsule_Ptr = PyCapsule_New(capsule_obj, "capsule", &pycapsule_destructor);
     PyCapsule_SetName(capsule_Ptr, "capsule");
     return capsule_Ptr;
 }
 
-static PyObject* cryptomagic_get_re_encryption_key_wrapper(PyObject *self, PyObject * args)
+static PyObject* proxylib_get_re_encryption_key_wrapper(PyObject *self, PyObject * args)
 {
     PyObject* cm_obj;
     PyObject* sk_obj;
@@ -223,13 +223,13 @@ static PyObject* cryptomagic_get_re_encryption_key_wrapper(PyObject *self, PyObj
     void * sk_Ptr = PyCapsule_GetPointer(sk_obj, "sk");
     void * pk_Ptr = PyCapsule_GetPointer(pk_obj, "pk");
 
-    void* rk_obj = cryptomagic_get_re_encryption_key(cm_Ptr, sk_Ptr, pk_Ptr);
+    void* rk_obj = proxylib_get_re_encryption_key(cm_Ptr, sk_Ptr, pk_Ptr);
     PyObject* rk_Ptr = PyCapsule_New(rk_obj, "rk", &pycapsule_destructor);
     PyCapsule_SetName(rk_Ptr, "rk");
     return rk_Ptr;  
 }
 
-static PyObject* cryptomagic_get_re_encryption_from_bytes_wrapper(PyObject *self, PyObject * args)
+static PyObject* proxylib_get_re_encryption_from_bytes_wrapper(PyObject *self, PyObject * args)
 {
     PyObject* cm_obj;
     PyObject* data;
@@ -239,13 +239,13 @@ static PyObject* cryptomagic_get_re_encryption_from_bytes_wrapper(PyObject *self
 
     char* buffer = PyBytes_AsString(data);
     void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm"); 
-    void* rk_obj = cryptomagic_get_re_encryption_from_bytes(cm_Ptr, buffer, strlen(buffer));
+    void* rk_obj = proxylib_get_re_encryption_from_bytes(cm_Ptr, buffer, strlen(buffer));
     PyObject* rk_Ptr = PyCapsule_New(rk_obj, "rk", &pycapsule_destructor);
     PyCapsule_SetName(rk_Ptr, "rk");
     return rk_Ptr;
 }
 
-static PyObject* cryptomagic_re_encryption_to_bytes_wrapper(PyObject *self, PyObject * args)
+static PyObject* proxylib_re_encryption_to_bytes_wrapper(PyObject *self, PyObject * args)
 {
     PyObject* rk_Ptr;
     
@@ -255,77 +255,77 @@ static PyObject* cryptomagic_re_encryption_to_bytes_wrapper(PyObject *self, PyOb
     char *buffer;
     int length; 
 
-    cryptomagic_re_encryption_to_bytes(PyCapsule_GetPointer(rk_Ptr, "rk"), &buffer, &length);
+    proxylib_re_encryption_to_bytes(PyCapsule_GetPointer(rk_Ptr, "rk"), &buffer, &length);
     return PyByteArray_FromStringAndSize(buffer, length);
 }
 
-static PyObject* cryptomagic_get_re_encryption_capsule_wrapper(PyObject *self, PyObject *args)
+static PyObject* proxylib_get_re_encryption_capsule_wrapper(PyObject *self, PyObject *args)
 {
     PyObject* cm_obj;
     PyObject* capsule_obj;
     PyObject* rk_obj;
 
-    if (! PyArg_UnpackTuple( args, "cm_obj", 2, 2, &cm_obj, &capsule_obj, &rk_obj))
+    if (! PyArg_UnpackTuple( args, "cm_obj", 3, 3, &cm_obj, &capsule_obj, &rk_obj))
         return NULL;
 
-    void* cm_Ptr = PyCapsule_GetPointer(rk_obj, "cm"); 
+    void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm"); 
     void* rk_Ptr = PyCapsule_GetPointer(rk_obj, "rk"); 
     void* capsule_Ptr = PyCapsule_GetPointer(capsule_obj, "capsule");
     
-    cryptomagic_get_re_encryption_capsule(cm_Ptr, capsule_Ptr, rk_Ptr);
-    PyObject* capsule = PyCapsule_New(capsule_Ptr, "capsule", &pycapsule_destructor);
-    PyCapsule_SetName(capsule, "capsule");
-    return capsule; 
+    void* recapsule_Ptr = proxylib_get_re_encryption_capsule(cm_Ptr, capsule_Ptr, rk_Ptr);
+    PyObject* recapsule = PyCapsule_New(recapsule_Ptr, "capsule", &pycapsule_destructor);
+    PyCapsule_SetName(recapsule, "capsule");
+    return recapsule; 
 }
 
-static PyMethodDef cryptomagic_methods[] = {
+static PyMethodDef proxylib_methods[] = {
     {
-        "cryptomagic_init_wrapper", cryptomagic_init_wrapper, METH_NOARGS,
+        "proxylib_init", proxylib_init_wrapper, METH_NOARGS,
     },
     {
-        "cryptomagic_new", cryptomagic_new_wrapper, METH_NOARGS,
+        "proxylib_new", proxylib_new_wrapper, METH_NOARGS,
     },
     {
-        "cryptomagic_generate_private_key", cryptomagic_generate_private_key_wrapper, METH_VARARGS,
+        "proxylib_generate_private_key", proxylib_generate_private_key_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_get_public_key", cryptomagic_get_public_key_wrapper, METH_VARARGS,
+        "proxylib_get_public_key", proxylib_get_public_key_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_private_key_to_bytes", cryptomagic_private_key_to_bytes_wrapper, METH_VARARGS,
+        "proxylib_private_key_to_bytes", proxylib_private_key_to_bytes_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_public_key_to_bytes", cryptomagic_public_key_to_bytes_wrapper, METH_VARARGS,
+        "proxylib_public_key_to_bytes", proxylib_public_key_to_bytes_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_private_key_from_bytes", cryptomagic_private_key_from_bytes_wrapper, METH_VARARGS,
+        "proxylib_private_key_from_bytes", proxylib_private_key_from_bytes_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_public_key_from_bytes", cryptomagic_public_key_from_bytes_wrapper, METH_VARARGS,
+        "proxylib_public_key_from_bytes", proxylib_public_key_from_bytes_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_encapsulate", cryptomagic_encapsulate_wrapper, METH_VARARGS,
+        "proxylib_encapsulate", proxylib_encapsulate_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_decapsulate", cryptomagic_decapsulate_wrapper, METH_VARARGS,
+        "proxylib_decapsulate", proxylib_decapsulate_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_capsule_to_bytes", cryptomagic_capsule_to_bytes_wrapper, METH_VARARGS,
+        "proxylib_capsule_to_bytes", proxylib_capsule_to_bytes_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_capsule_from_bytes", cryptomagic_capsule_from_bytes_wrapper, METH_VARARGS,
+        "proxylib_capsule_from_bytes", proxylib_capsule_from_bytes_wrapper, METH_VARARGS,
     },
     {
-        "cryptomagic_get_re_encryption_key", cryptomagic_get_re_encryption_key_wrapper, METH_VARARGS,
+        "proxylib_get_re_encryption_key", proxylib_get_re_encryption_key_wrapper, METH_VARARGS,
     }, 
     {
-        "cryptomagic_get_re_encryption_from_bytes", cryptomagic_get_re_encryption_from_bytes_wrapper, METH_VARARGS,
+        "proxylib_get_re_encryption_from_bytes", proxylib_get_re_encryption_from_bytes_wrapper, METH_VARARGS,
     }, 
     {
-        "cryptomagic_re_encryption_to_bytes", cryptomagic_re_encryption_to_bytes_wrapper, METH_VARARGS,
+        "proxylib_re_encryption_to_bytes", proxylib_re_encryption_to_bytes_wrapper, METH_VARARGS,
     }, 
     {
-        "cryptomagic_get_re_encryption_capsule", cryptomagic_get_re_encryption_capsule_wrapper, METH_VARARGS,
+        "proxylib_get_re_encryption_capsule", proxylib_get_re_encryption_capsule_wrapper, METH_VARARGS,
     }, 
     {NULL, NULL, 0, NULL}
 };
@@ -333,16 +333,16 @@ static PyMethodDef cryptomagic_methods[] = {
 // Module definition
 // The arguments of this structure tell Python what to call your extension,
 // what it's methods are and where to look for it's method definitions
-static struct PyModuleDef cryptomagic_definition = {
+static struct PyModuleDef proxylib_definition = {
     PyModuleDef_HEAD_INIT,
-    "cryptomagic",
+    "proxylib",
     "A Python module extension for C++ lib",
     -1,
-    cryptomagic_methods
+    proxylib_methods
 };
 
-PyMODINIT_FUNC PyInit_cryptomagic(void) {
+PyMODINIT_FUNC PyInit_proxylib(void) {
     Py_Initialize();
-    return PyModule_Create(&cryptomagic_definition);
+    return PyModule_Create(&proxylib_definition);
 }
 

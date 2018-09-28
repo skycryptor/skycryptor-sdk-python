@@ -1,32 +1,30 @@
 #
 import os
-path = os.environ["package"]
-os.sys.path.append(path)
-from os.path import dirname, abspath
 
 #
+from proxylib_test import TestProxyLib
+
+import skycryptor
 from skycryptor.skycryptor import SkyCryptor
-from cryptomagic_test import TestCryptoMagic
-
 
 #
-class ReKeyFromToBytes(TestCryptoMagic):
+class ReKeyFromToBytes(TestProxyLib):
     #
     def setUp(self):
         super(ReKeyFromToBytes, self).setUp()
 
     #
     def test_re_key_from_to_bytes(self):
-        sc = SkyCryptor()
-        skA = sc.generate()
-        skB = sc.generate()
-        pkB = skB.get_public_key()
+        Skycryptor = SkyCryptor()
+        skA = Skycryptor.generate()
+        skB = Skycryptor.generate()
+        pkB = Skycryptor.public_key(skB)
 
-        rkAB_1 = skA.generate_re_encryption_key(pkB)
+        rkAB_1 = Skycryptor.generate_re_key(skA, pkB)
 
         rkAB_1_data = rkAB_1.to_bytes()
 
-        rkAB_2 = sc.re_encryption_key_from_bytes(rkAB_1_data)
+        rkAB_2 = Skycryptor.re_encryption_key_from_bytes(rkAB_1_data)
 
         rkAB_2_data = rkAB_2.to_bytes()
 

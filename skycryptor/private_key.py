@@ -1,15 +1,15 @@
 #
-import cryptomagic
+import proxylib
 import binascii
 
 #
-from .crypto_magic import CryptoMagic
+from .proxy_lib import ProxyLib
 from .public_key import PublicKey
 from .re_key import ReEncryptionKey
 
 
 #
-class PrivateKey(CryptoMagic):
+class PrivateKey(ProxyLib):
     """
     PrivateKey object, which is Python implementation of extended C/C++ library interface
     """
@@ -24,7 +24,7 @@ class PrivateKey(CryptoMagic):
 
         :param no:
         """
-        self.set_pointer(cryptomagic.cryptomagic_generate_private_key(self.get_pointer()))
+        self.set_pointer(proxylib.proxylib_generate_private_key(self.get_pointer()))
 
     def get_public_key(self):
         """
@@ -33,8 +33,8 @@ class PrivateKey(CryptoMagic):
         :param no:
         :return public key:
         """
-        pk = PublicKey(CryptoMagic())
-        pk.set_pointer(cryptomagic.cryptomagic_get_public_key(self.get_pointer()))
+        pk = PublicKey(ProxyLib())
+        pk.set_pointer(proxylib.proxylib_get_public_key(self.get_pointer()))
         return pk
 
     def to_bytes(self):
@@ -43,7 +43,7 @@ class PrivateKey(CryptoMagic):
 
         :return byte array:
         """
-        return binascii.hexlify(cryptomagic.cryptomagic_private_key_to_bytes(self.get_pointer()))
+        return binascii.hexlify(proxylib.proxylib_private_key_to_bytes(self.get_pointer()))
 
     def from_bytes(self, data):
         """
@@ -51,7 +51,7 @@ class PrivateKey(CryptoMagic):
 
         :param data: byte array
         """
-        self.set_pointer(cryptomagic.cryptomagic_private_key_from_bytes(self.get_pointer(), binascii.unhexlify(data)))
+        self.set_pointer(proxylib.proxylib_private_key_from_bytes(self.get_pointer(), binascii.unhexlify(data)))
 
     def generate_re_encryption_key(self, pk):
         """
@@ -62,11 +62,11 @@ class PrivateKey(CryptoMagic):
         :return rk: generated re-encryption key
         """
 
-        rk = ReEncryptionKey(CryptoMagic())
-        rk.set_pointer(cryptomagic.cryptomagic_get_re_encryption_key(self.get_pointer(), pk.get_pointer(), self.cm.get_pointer()))
+        rk = ReEncryptionKey(ProxyLib())
+        rk.set_pointer(proxylib.proxylib_get_re_encryption_key(self.get_pointer(), pk.get_pointer(), self.cm.get_pointer()))
         return rk
 
-    def decapsulate(self, capsule):
+    def decapsulation(self, capsule):
         """
         Decapsulating given capsule and getting back symmetric key
 
@@ -74,4 +74,4 @@ class PrivateKey(CryptoMagic):
         :return symmetric key:
         """
 
-        return cryptomagic.cryptomagic_decapsulate(self.cm.get_pointer(), self.get_pointer().capsule.get_pointer())
+        return proxylib.proxylib_decapsulate(self.cm.get_pointer(), self.get_pointer(), capsule.get_pointer())

@@ -1,9 +1,9 @@
 #
-import cryptomagic
+import proxylib
 
 
 #
-class CryptoMagic:
+class ProxyLib:
     """
     Main Crypto operations structure, which is a Python implementation
     of existing C/C++ library interface
@@ -11,11 +11,11 @@ class CryptoMagic:
 
     def __init__(self):
         """
-        Making new CryptoMagic root object to perform cryptographic operations.
+        Making new ProxyLib root object to perform cryptographic operations.
 
         :param no:
         """
-        self.__pointer = cryptomagic.cryptomagic_new()
+        self.__pointer = proxylib.proxylib_new()
 
     def get_pointer(self):
         return self.__pointer

@@ -1,16 +1,12 @@
 #
 import os
-path = os.environ["package"]
-os.sys.path.append(path)
-from os.path import dirname, abspath
 
 import base64
-import binascii
 from Crypto.Cipher import AES
 
 
 #
-from cryptomagic_test import TestCryptoMagic
+from proxylib_test import TestProxyLib
 
 #
 import binascii
@@ -25,7 +21,7 @@ class AESCipher(object):
 
     def encrypt(self, raw):
         raw = self._pad(raw)
-        encrypted = self.cipher.encrypt(raw)
+        encrypted = self.cipher.encrypt(raw.encode("latin-1"))
         encoded = base64.b64encode(encrypted)
         return str(encoded, 'utf-8')
 
@@ -42,54 +38,53 @@ class AESCipher(object):
 
 
 #
-class Capsule(TestCryptoMagic):
+class Capsule(TestProxyLib):
     #
     def setUp(self):
         super(Capsule, self).setUp()
 
     #
     def test_capsule_from_to_bytes(self):
-        sc = SkyCryptor()
-        sk = sc.generate()
-        pk = sk.get_public_key()
+        Skycryptor = SkyCryptor()
+        sk = Skycryptor.generate()
+        pk = Skycryptor.public_key(sk)
 
-        capsule_1, _ = pk.encapsulate()
+        capsule_1, _ = Skycryptor.encapsulate(pk)
         cData_1 = capsule_1.to_bytes()
-        capsule_2 = sc.capsule_from_bytes(cData_1)
+        capsule_2 = Skycryptor.capsule_from_bytes(cData_1)
         cData_2 = capsule_2.to_bytes()
 
         self.assertEqual(cData_1, cData_2)
 
     def test_encapsulate_decapsulate(self):
-        sc = SkyCryptor()
-        sk = sc.generate()
-        pk = sk.get_public_key()
+        Skycryptor = SkyCryptor()
+        sk = Skycryptor.generate()
+        pk = Skycryptor.public_key(sk)
 
-        capsule_1, sym_key_1 = pk.encapsulate()
+        capsule_1, sym_key_1 = Skycryptor.encapsulate(pk)
         cData_1 = capsule_1.to_bytes()
 
-        capsule_2 = sc.capsule_from_bytes(cData_1)
+        capsule_2 = Skycryptor.capsule_from_bytes(cData_1)
         cData_2 = capsule_2.to_bytes()
 
         self.assertEqual(cData_1, cData_2)
 
     def test_AES_encrypt_decrypt(self):
-        sc = SkyCryptor()
-        alice_sk = sc.generate()
-        alice_pk = alice_sk.get_public_key()
+        Skycryptor = SkyCryptor()
+        alice_sk = Skycryptor.generate()
+        alice_pk = Skycryptor.public_key(alice_sk)
 
-        bob_sk = sc.generate()
-        bob_pk = bob_sk.get_public_key()
+        bob_sk = Skycryptor.generate()
+        bob_pk = Skycryptor.public_key(bob_sk)
 
-        capsule, symmetric_key_1 = bob_pk.encapsulate()
-
+        capsule, symmetric_key_1 = Skycryptor.encapsulate(bob_pk)
+        #print("\n{}\n".format(binascii.hexlify(symmetric_key_1)))
         alice_cipher = AESCipher(binascii.hexlify(symmetric_key_1)[:16])
 
-
-        plaintext = 'abkcdcln;lfwenhcbehkslascn.osbo'
+        plaintext = 'abkcdclnlfwenhcbehkslaSkycryptornosbo'
         encrypted = alice_cipher.encrypt(plaintext)
 
-        symmetric_key_2 = bob_sk.decapsulate(capsule)
+        symmetric_key_2 = Skycryptor.decapsulate(bob_sk, capsule)
         bob_cipher = AESCipher(binascii.hexlify(symmetric_key_2)[:16])
 
         decrypted = bob_cipher.decrypt(encrypted)
@@ -97,37 +92,33 @@ class Capsule(TestCryptoMagic):
         self.assertEqual(decrypted, plaintext)
 
     def test_AES_encrypt_decrypt_re_encrypt(self):
-        sc = SkyCryptor()
+        Skycryptor = SkyCryptor()
 
         # create private, public keys
-        alice_sk = sc.generate()
-        alice_pk = alice_sk.get_public_key()
+        alice_sk = Skycryptor.generate()
+        alice_pk = Skycryptor.public_key(alice_sk)
 
-        bob_sk = sc.generate()
-        bob_pk = bob_sk.get_public_key()
+        bob_sk = Skycryptor.generate()
+        bob_pk = Skycryptor.public_key(bob_sk)
 
         # re-encryption key from Alice to Bob
-        rk_AB = alice_sk.generate_re_encryption_key(bob_pk)
+        rk_AB = Skycryptor.generate_re_key(alice_sk, bob_pk)
 
         # alice encrypt plaintext
-        alice_capsule, alice_symmetric_key = alice_pk.encapsulate()
-
+        alice_capsule, alice_symmetric_key = Skycryptor.encapsulate(alice_pk)
+        print("\n{}\n".format(binascii.hexlify(alice_symmetric_key)))
         alice_cipher = AESCipher(binascii.hexlify(alice_symmetric_key)[:16])
-        plaintext = 'abkcdclnlfwenhcbehkslascnosbo'
+        plaintext = 'abkcdclnlfwenhcbehkslaSkycryptornosbo'
 
         ciphertext = alice_cipher.encrypt(plaintext)
 
         # Bob decrypt ciphertext
 
         # first re-encrypt capsule
-        recapsule = rk_AB.re_encrypt(alice_capsule)
-
-        bob_symmetric_key = bob_sk.decapsulate(recapsule)
+        recapsule = Skycryptor.re_encrypt(rk_AB, alice_capsule)
+        bob_symmetric_key = Skycryptor.decapsulate(bob_sk, recapsule)
 
         bob_cipher = AESCipher(binascii.hexlify(bob_symmetric_key)[:16])
         decrypted = bob_cipher.decrypt(ciphertext)
 
-        #print("3 - {}\n".format(decrypted))
         self.assertEqual(binascii.hexlify(alice_symmetric_key), binascii.hexlify(bob_symmetric_key))
-
-

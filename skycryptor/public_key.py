@@ -1,14 +1,14 @@
 #
 import binascii
-import cryptomagic
+import proxylib
 
 #
-from .crypto_magic import CryptoMagic
+from .proxy_lib import ProxyLib
 from .capsule import Capsule
 
 
 #
-class PublicKey(CryptoMagic):
+class PublicKey(ProxyLib):
     """
     PublicKey object, which is Python implementation of
     extended C/C++ library interface
@@ -26,7 +26,7 @@ class PublicKey(CryptoMagic):
         :return byte array:
         """
 
-        return binascii.hexlify(cryptomagic.cryptomagic_public_key_to_bytes(self.get_pointer()))
+        return binascii.hexlify(proxylib.proxylib_public_key_to_bytes(self.get_pointer()))
 
     def from_bytes(self, data):
         """
@@ -36,9 +36,9 @@ class PublicKey(CryptoMagic):
         :return: no
         """
 
-        self.set_pointer(cryptomagic.cryptomagic_public_key_from_bytes(self.get_pointer(), binascii.unhexlify(data)))
+        self.set_pointer(proxylib.proxylib_public_key_from_bytes(self.get_pointer(), binascii.unhexlify(data)))
 
-    def encapsulate(self):
+    def encapsulation(self):
         """
         Making encapsulation and getting Capsule with symmetric key
 
@@ -46,7 +46,7 @@ class PublicKey(CryptoMagic):
         :return capsule and symmetric key
 
         """
-        capsule = Capsule()
-        capsule_pointer, symmetric_key = cryptomagic.cryptomagic_encapsulate(self.cm.get_pointer(), self.get_pointer())
+        capsule = Capsule(ProxyLib())
+        capsule_pointer, symmetric_key = proxylib.proxylib_encapsulate(self.cm.get_pointer(), self.get_pointer())
         capsule.set_pointer(capsule_pointer)
         return capsule, symmetric_key
