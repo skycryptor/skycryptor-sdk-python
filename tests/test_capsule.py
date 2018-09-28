@@ -108,17 +108,19 @@ class Capsule(TestProxyLib):
         alice_capsule, alice_symmetric_key = Skycryptor.encapsulate(alice_pk)
         print("\n{}\n".format(binascii.hexlify(alice_symmetric_key)))
         alice_cipher = AESCipher(binascii.hexlify(alice_symmetric_key)[:16])
-        plaintext = 'abkcdclnlfwenhcbehkslaSkycryptornosbo'
-
+        plaintext = 'abkcdclnlfwenhcbehkslascnosbo'
         ciphertext = alice_cipher.encrypt(plaintext)
-
         # Bob decrypt ciphertext
 
         # first re-encrypt capsule
         recapsule = Skycryptor.re_encrypt(rk_AB, alice_capsule)
         bob_symmetric_key = Skycryptor.decapsulate(bob_sk, recapsule)
 
+        recapsule = rk_AB.re_encrypt(alice_capsule)
+
+        bob_symmetric_key = bob_sk.decapsulate(recapsule)
         bob_cipher = AESCipher(binascii.hexlify(bob_symmetric_key)[:16])
+       
         decrypted = bob_cipher.decrypt(ciphertext)
 
         self.assertEqual(binascii.hexlify(alice_symmetric_key), binascii.hexlify(bob_symmetric_key))

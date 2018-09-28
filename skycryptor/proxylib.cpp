@@ -152,7 +152,7 @@ static PyObject* proxylib_encapsulate_wrapper(PyObject *self, PyObject * args)
     void* capsule_obj = proxylib_encapsulate(cm_Ptr, pk_Ptr, &buffer, &length);
     PyObject* capsule_Ptr = PyCapsule_New(capsule_obj, "capsule", &pycapsule_destructor);
     PyCapsule_SetName(capsule_Ptr, "capsule");
-    PyObject* symmetric_key = PyBytes_FromStringAndSize(buffer, length);
+    PyObject* symmetric_key = PyByteArray_FromStringAndSize(buffer, length);
  
     PyObject* tuple_Ptr = PyTuple_Pack(2, capsule_Ptr, symmetric_key);
  
@@ -182,9 +182,9 @@ static PyObject* proxylib_decapsulate_wrapper(PyObject *self, PyObject * args)
 
 static PyObject* proxylib_capsule_to_bytes_wrapper(PyObject *self, PyObject * args)
 {
-    PyObject* capsule_Ptr;
+    PyObject* capsule_obj;
     
-    if (! PyArg_UnpackTuple( args, "to_bytes",0,1, &capsule_Ptr))
+    if (! PyArg_UnpackTuple( args, "to_bytes",0,1, &capsule_obj))
         return NULL;
 
     char *buffer;
@@ -271,7 +271,6 @@ static PyObject* proxylib_get_re_encryption_capsule_wrapper(PyObject *self, PyOb
     void* cm_Ptr = PyCapsule_GetPointer(cm_obj, "cm"); 
     void* rk_Ptr = PyCapsule_GetPointer(rk_obj, "rk"); 
     void* capsule_Ptr = PyCapsule_GetPointer(capsule_obj, "capsule");
-    
     void* recapsule_Ptr = proxylib_get_re_encryption_capsule(cm_Ptr, capsule_Ptr, rk_Ptr);
     PyObject* recapsule = PyCapsule_New(recapsule_Ptr, "capsule", &pycapsule_destructor);
     PyCapsule_SetName(recapsule, "capsule");

@@ -21,8 +21,9 @@ class ReEncryptionKey(ProxyLib):
         :param capsule: capsule obj
         :return recapsule: re-encrypted capsule
         """
-        recapsule = Capsule(ProxyLib())
-        capsule_pointer = proxylib.proxylib_get_re_encryption_capsule(self.cm.get_pointer(), capsule.get_pointer(), self.get_pointer())
+
+        recapsule = Capsule()
+        capsule_pointer = cryptomagic.cryptomagic_get_re_encryption_capsule(self.cm.get_pointer(), capsule.get_pointer(), self.get_pointer())
         recapsule.set_pointer(capsule_pointer)
         return recapsule
 
